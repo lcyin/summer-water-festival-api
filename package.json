@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "cross-env NODE_ENV=test DOTENV_PATH=.env.test jest",
+    "test:watch": "cross-env NODE_ENV=test DOTENV_PATH=.env.test jest --watch",
     "db:setup": "./scripts/db-setup.sh",
     "db:test:setup": "./scripts/db-test-setup.sh",
     "start": "node src/server.js"
