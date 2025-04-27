@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "db:setup": "./scripts/db-setup.sh",
+    "db:test:setup": "./scripts/db-test-setup.sh",
     "start": "node src/app.js"
   },
   "keywords": [],
