@@ -1,10 +1,9 @@
-const express = require('express');
-const pool = require('../db');
-const { fetchAvaliableTickets } = require('../services/tickets.service')
+import express from 'express';
+import { fetchAvaliableTickets } from '../services/tickets.service.js';
 
 const router = express.Router();
 
 // GET /api/tickets/availability
 router.get('/availability', fetchAvaliableTickets);
 
-module.exports = router;
+export default router;

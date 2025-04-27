@@ -1,5 +1,6 @@
-const pool = require('../db');
-const fetchAvaliableTickets = async (req, res, next) => {
+import pool from '../db/index.js';
+
+export const fetchAvaliableTickets = async (req, res, next) => {
     try {
         const result = await pool.query(`
             SELECT tt.name, COUNT(t.id) AS sold,
@@ -15,8 +16,4 @@ const fetchAvaliableTickets = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-}
-
-module.exports = {
-    fetchAvaliableTickets
 }

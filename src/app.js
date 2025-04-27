@@ -1,7 +1,7 @@
-const express = require('express');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const ticketsRouter = require('./routes/tickets.route');
+import express from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import ticketsRouter from './routes/tickets.route.js';
 
 const app = express();
 
