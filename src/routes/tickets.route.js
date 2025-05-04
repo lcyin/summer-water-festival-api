@@ -1,20 +1,30 @@
-import express from 'express';
-import { fetchAvaliableTickets, checkTicketAvailability, purchaseTickets } from '../services/tickets.service.js';
+import express from "express";
+import {
+  fetchAvaliableTickets,
+  purchaseTickets,
+} from "../services/tickets.service.js";
 
 const router = express.Router();
 
 // GET /api/tickets/availability
-router.get('/availability', fetchAvaliableTickets);
+router.get("/availability", async (req, res, next) => {
+  try {
+    const result = await fetchAvaliableTickets();
+    res.json(result.rows);
+  } catch (err) {
+    next(err);
+  }
+});
 
 // POST /api/tickets/purchase
-router.post('/purchase', async (req, res, next) => {
-    try {
-        const { ticketType, quantity } = req.body;
-        const result = await purchaseTickets(ticketType, quantity);
-        res.status(200).json(result);
-    } catch (error) {
-        return res.status(400).json({ error: error.message });
-    }
+router.post("/purchase", async (req, res, next) => {
+  try {
+    const { ticketType, quantity } = req.body;
+    const result = await purchaseTickets(ticketType, quantity);
+    res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
 });
 
 export default router;
