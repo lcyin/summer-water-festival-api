@@ -18,50 +18,46 @@ export const fetchAvaliableTickets = async () => {
 };
 
 export const checkTicketAvailability = async (ticketType, quantity) => {
-  try {
-    const result = await pool.query(
-      `
-            SELECT tt.name, COUNT(t.id) AS sold,
-                   CASE tt.name 
-                       WHEN 'Normal' THEN 150 
-                       WHEN 'VIP' THEN 50 
-                   END AS limit
-            FROM ticket_types tt
-            LEFT JOIN tickets t ON t.ticket_type_id = tt.id
-            WHERE tt.name = $1
-            GROUP BY tt.name
-        `,
-      [ticketType]
-    );
+  const result = await pool.query(
+    `
+              SELECT tt.name, COUNT(t.id) AS sold,
+                     CASE tt.name 
+                         WHEN 'Normal' THEN 150 
+                         WHEN 'VIP' THEN 50 
+                     END AS limit
+              FROM ticket_types tt
+              LEFT JOIN tickets t ON t.ticket_type_id = tt.id
+              WHERE tt.name = $1
+              GROUP BY tt.name
+          `,
+    [ticketType]
+  );
 
-    if (result.rows.length === 0) {
-      throw new Error(`Invalid ticket type: ${ticketType}`);
-    }
-
-    const { sold, limit } = result.rows[0];
-    const available = limit - parseInt(sold);
-
-    if (available < quantity) {
-      throw new Error(
-        `Not enough ${ticketType} tickets available. Requested: ${quantity}, Available: ${available}`
-      );
-    }
-
-    const ticketTypeResult = await pool.query(
-      `
-            SELECT id, price FROM ticket_types WHERE name = $1
-        `,
-      [ticketType]
-    );
-
-    return {
-      available,
-      limit,
-      ticketType: ticketTypeResult.rows[0],
-    };
-  } catch (error) {
-    throw error;
+  if (result.rows.length === 0) {
+    throw new Error(`Invalid ticket type: ${ticketType}`);
   }
+
+  const { sold, limit } = result.rows[0];
+  const available = limit - parseInt(sold);
+
+  if (available < quantity) {
+    throw new Error(
+      `Not enough ${ticketType} tickets available. Requested: ${quantity}, Available: ${available}`
+    );
+  }
+
+  const ticketTypeResult = await pool.query(
+    `
+              SELECT id, price FROM ticket_types WHERE name = $1
+          `,
+    [ticketType]
+  );
+
+  return {
+    available,
+    limit,
+    ticketType: ticketTypeResult.rows[0],
+  };
 };
 
 const validateTicketPurchaseInput = (ticketType, quantity) => {
