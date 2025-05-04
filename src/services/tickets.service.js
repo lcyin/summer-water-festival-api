@@ -83,34 +83,30 @@ const validateTicketPurchaseInput = (ticketType, quantity) => {
 };
 
 export const purchaseTickets = async (ticketTypeRaw, quantityRaw) => {
-  try {
-    const requestBodyOrError = validateTicketPurchaseInput(
-      ticketTypeRaw,
-      quantityRaw
-    );
+  const requestBodyOrError = validateTicketPurchaseInput(
+    ticketTypeRaw,
+    quantityRaw
+  );
 
-    if (typeof requestBodyOrError === "string") {
-      throw new Error(requestBodyOrError);
-    }
-
-    const { ticketType: ticketTypeValidated, quantity: quantityValidated } =
-      requestBodyOrError;
-
-    // Check ticket availability
-    const { available, limit, ticketType } = await checkTicketAvailability(
-      ticketTypeValidated,
-      quantityValidated
-    );
-    const client = await pool.connect();
-
-    return processTicketPurchaseTransaction(
-      client,
-      ticketType,
-      quantityValidated
-    );
-  } catch (error) {
-    throw error;
+  if (typeof requestBodyOrError === "string") {
+    throw new Error(requestBodyOrError);
   }
+
+  const { ticketType: ticketTypeValidated, quantity: quantityValidated } =
+    requestBodyOrError;
+
+  // Check ticket availability
+  const { available, limit, ticketType } = await checkTicketAvailability(
+    ticketTypeValidated,
+    quantityValidated
+  );
+  const client = await pool.connect();
+
+  return processTicketPurchaseTransaction(
+    client,
+    ticketType,
+    quantityValidated
+  );
 };
 
 const processTicketPurchaseTransaction = async (
