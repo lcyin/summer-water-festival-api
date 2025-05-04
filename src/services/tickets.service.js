@@ -82,7 +82,7 @@ const validateTicketPurchaseInput = (ticketType, quantity) => {
   };
 };
 
-export const purchaseTickets = async (ticketTypeRaw, quantityRaw) => {
+const fetchInfoForPurchaseTickets = async (ticketTypeRaw, quantityRaw) => {
   const requestBodyOrError = validateTicketPurchaseInput(
     ticketTypeRaw,
     quantityRaw
@@ -91,9 +91,17 @@ export const purchaseTickets = async (ticketTypeRaw, quantityRaw) => {
   if (typeof requestBodyOrError === "string") {
     throw new Error(requestBodyOrError);
   }
-
   const { ticketType: ticketTypeValidated, quantity: quantityValidated } =
     requestBodyOrError;
+  return {
+    ticketTypeValidated,
+    quantityValidated,
+  };
+};
+
+export const purchaseTickets = async (ticketTypeRaw, quantityRaw) => {
+  const { ticketTypeValidated, quantityValidated } =
+    await fetchInfoForPurchaseTickets(ticketTypeRaw, quantityRaw);
 
   // Check ticket availability
   const { available, limit, ticketType } = await checkTicketAvailability(
