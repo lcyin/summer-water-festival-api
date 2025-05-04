@@ -93,21 +93,26 @@ const fetchInfoForPurchaseTickets = async (ticketTypeRaw, quantityRaw) => {
   }
   const { ticketType: ticketTypeValidated, quantity: quantityValidated } =
     requestBodyOrError;
-  return {
-    ticketTypeValidated,
-    quantityValidated,
-  };
-};
-
-export const purchaseTickets = async (ticketTypeRaw, quantityRaw) => {
-  const { ticketTypeValidated, quantityValidated } =
-    await fetchInfoForPurchaseTickets(ticketTypeRaw, quantityRaw);
-
   // Check ticket availability
   const { available, limit, ticketType } = await checkTicketAvailability(
     ticketTypeValidated,
     quantityValidated
   );
+  return {
+    ticketTypeValidated,
+    quantityValidated,
+    available,
+    limit,
+    ticketType,
+  };
+};
+
+export const purchaseTickets = async (ticketTypeRaw, quantityRaw) => {
+  const { quantityValidated, ticketType } = await fetchInfoForPurchaseTickets(
+    ticketTypeRaw,
+    quantityRaw
+  );
+
   const client = await pool.connect();
 
   return processTicketPurchaseTransaction(
