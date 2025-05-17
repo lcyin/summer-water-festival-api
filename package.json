@@ -19,7 +19,8 @@
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.1.0",
-    "pg": "^8.15.6"
+    "pg": "^8.15.6",
+    "qr-image": "^3.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
