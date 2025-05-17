@@ -128,6 +128,7 @@ const processTicketPurchaseTransaction = async (
   quantity
 ) => {
   // Start a transaction
+  const result = [];
   try {
     await client.query("BEGIN");
 
@@ -141,36 +142,32 @@ const processTicketPurchaseTransaction = async (
     );
     const orderId = orderResult.rows[0].id;
 
-    // Generate and insert tickets
-    const tickets = Array.from({ length: quantity }, (_, i) =>
-      buildOrder(orderId, ticketTypeId)
-    );
-    const values = tickets
-      .map(
-        (ticket, index) =>
-          `($${index * 3 + 1}, $${index * 3 + 2}, $${index * 3 + 3})`
-      )
-      .join(",");
-    const params = tickets.flatMap((ticket) => [
-      ticket.orderId,
-      ticket.ticketTypeId,
-      ticket.qrCode,
-    ]);
-
-    const ticketResultsRaw = await client.query(
-      `INSERT INTO tickets (order_id, ticket_type_id, qr_code)
-             VALUES ${values}
-             RETURNING id, qr_code`,
-      params
-    );
-    const ticketResults = ticketResultsRaw.rows;
+    for (let index = 0; index < quantity; index++) {
+      const ticketRaw = buildOrder(orderId, ticketTypeId);
+      const insertQuery = `INSERT INTO tickets (order_id, ticket_type_id)
+      VALUES ($1, $2)
+      RETURNING id;`;
+      const insertedTicket = await client.query(insertQuery, [
+        orderId,
+        ticketTypeId,
+      ]);
+      const updateQuery = `UPDATE tickets SET qr_code = $1 WHERE id = $2 RETURNING id, "qr_code";`;
+      const qrCode = `${
+        insertedTicket.rows[0].id
+      }-${orderId}-${ticketTypeId}-${Date.now()}`;
+      const updateTicket = await client.query(updateQuery, [
+        qrCode,
+        insertedTicket.rows[0].id,
+      ]);
+      result.push(...updateTicket.rows);
+    }
 
     await client.query("COMMIT");
 
     return {
       message: "Tickets purchased successfully",
       orderId,
-      ticketResults,
+      ticketResults: result,
     };
   } catch (error) {
     await client.query("ROLLBACK");

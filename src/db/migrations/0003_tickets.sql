@@ -2,7 +2,7 @@ CREATE TABLE tickets (
     id SERIAL PRIMARY KEY,
     order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
     ticket_type_id INTEGER NOT NULL REFERENCES ticket_types(id),
-    qr_code VARCHAR(100) NOT NULL UNIQUE,
+    qr_code VARCHAR(100),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

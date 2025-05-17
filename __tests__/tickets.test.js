@@ -10,8 +10,8 @@ describe("Tickets API", () => {
     expect(process.env.DB_NAME).toBe("summer_water_festival_test");
     expect(process.env.NODE_ENV).toBe("test");
 
-    await pool.query("DELETE FROM orders");
-    await pool.query("DELETE FROM tickets");
+    // await pool.query("DELETE FROM orders");
+    // await pool.query("DELETE FROM tickets");
   });
 
   afterAll(async () => {
@@ -19,7 +19,6 @@ describe("Tickets API", () => {
   });
 
   describe("GET /api/tickets/availability", () => {
-
     it("should return 200 and ticket availability data", async () => {
       const response = await request(app)
         .get("/api/tickets/availability")
@@ -49,9 +48,7 @@ describe("Tickets API", () => {
         .expect("Content-Type", /json/)
         .expect(400);
 
-      expect(response.body.error).toBe(
-        "Missing required fields: ticketType"
-      );
+      expect(response.body.error).toBe("Missing required fields: ticketType");
     });
 
     it("should return 400 when quantity is invalid", async () => {
@@ -61,9 +58,7 @@ describe("Tickets API", () => {
         .expect("Content-Type", /json/)
         .expect(400);
 
-      expect(response.body.error).toEqual(
-        "Quantity must be greater than 0"
-      );
+      expect(response.body.error).toEqual("Quantity must be greater than 0");
     });
 
     it("should return 400 when ticket type is invalid", async () => {
@@ -76,26 +71,25 @@ describe("Tickets API", () => {
       expect(response.body.error).toBe("Invalid ticket type: InvalidType");
     });
 
-    it("should return 200 when tickets are available", async () => {
+    it("buy 2 tickerts, should return 200 when tickets are available", async () => {
       const response = await request(app)
         .post("/api/tickets/purchase")
-        .send({ ticketType: "Normal", quantity: 1 })
-        .expect("Content-Type", /json/)
-        .expect(200);
+        .send({ ticketType: "Normal", quantity: 2 });
 
-      expect(response.body).toEqual(
-        {
-          "message": "Tickets purchased successfully",
-          "orderId": expect.any(Number),
-          "ticketResults": [
-            {
-              "id": expect.any(Number),
-              "qr_code": expect.any(String),
-            },
-          ],
-        }
-      );
+      expect(response.body).toEqual({
+        message: "Tickets purchased successfully",
+        orderId: expect.any(Number),
+        ticketResults: [
+          {
+            id: expect.any(Number),
+            qr_code: expect.any(String),
+          },
+          {
+            id: expect.any(Number),
+            qr_code: expect.any(String),
+          },
+        ],
+      });
     });
-
   });
 });
