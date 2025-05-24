@@ -19,8 +19,8 @@ router.get("/availability", async (req, res, next) => {
 // POST /api/tickets/purchase
 router.post("/purchase", async (req, res, next) => {
   try {
-    const { ticketType, quantity } = req.body;
-    const result = await purchaseTickets(ticketType, quantity);
+    const { ticketType, quantity, email } = req.body;
+    const result = await purchaseTickets(ticketType, quantity, email);
     res.status(200).json(result);
   } catch (error) {
     return res.status(400).json({ error: error.message });

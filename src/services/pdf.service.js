@@ -10,6 +10,8 @@ export const generateTicketPDF = async (orderId, qrCodes, outputPath) => {
 
   let y = 160;
   qrCodes.forEach((qrCode, idx) => {
+    doc.fontSize(14).text(`Ticket ${idx + 1}`, 100, y);
+    y += 20;
     doc.fontSize(14).text(`QR Code ${idx + 1}: ${qrCode}`, 100, y);
     y += 20;
     const qrImage = qr.imageSync(qrCode, { type: "png" });

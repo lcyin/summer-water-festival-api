@@ -109,7 +109,7 @@ const fetchInfoForPurchaseTickets = async (ticketTypeRaw, quantityRaw) => {
   };
 };
 
-export const purchaseTickets = async (ticketTypeRaw, quantityRaw) => {
+export const purchaseTickets = async (ticketTypeRaw, quantityRaw, email) => {
   const { quantityValidated, ticketType } = await fetchInfoForPurchaseTickets(
     ticketTypeRaw,
     quantityRaw
@@ -120,14 +120,16 @@ export const purchaseTickets = async (ticketTypeRaw, quantityRaw) => {
   return processTicketPurchaseTransaction(
     client,
     ticketType,
-    quantityValidated
+    quantityValidated,
+    email
   );
 };
 
 const processTicketPurchaseTransaction = async (
   client,
   { id: ticketTypeId, price: ticketPrice },
-  quantity
+  quantity,
+  email
 ) => {
   // Start a transaction
   const result = [];
@@ -173,7 +175,7 @@ const processTicketPurchaseTransaction = async (
     );
     // Wait 1 second between each ticket PDF generation and email sending
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    await sendTicketEmail("lcykevinlai@gmail.com", orderId, pdfPath);
+    await sendTicketEmail(email, orderId, pdfPath);
     return {
       message: "Tickets purchased successfully",
       orderId,
