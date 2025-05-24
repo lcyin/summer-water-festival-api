@@ -165,22 +165,15 @@ const processTicketPurchaseTransaction = async (
     }
 
     await client.query("COMMIT");
-
-    for (const ticket of result) {
-      const pdf = await generateTicketPDF(
-        orderId,
-        ticket.qr_code,
-        `tmp/ticket-${ticket.id}.pdf`
-      );
-      // Wait 1 second between each ticket PDF generation and email sending
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await sendTicketEmail(
-        "lcykevinlai@gmail.com",
-        orderId,
-        `tmp/ticket-${ticket.id}.pdf`
-      );
-    }
-
+    const pdfPath = `tmp/order-${orderId}.pdf`;
+    const pdf = await generateTicketPDF(
+      orderId,
+      result.map((ticket) => ticket.qr_code),
+      pdfPath
+    );
+    // Wait 1 second between each ticket PDF generation and email sending
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await sendTicketEmail("lcykevinlai@gmail.com", orderId, pdfPath);
     return {
       message: "Tickets purchased successfully",
       orderId,
