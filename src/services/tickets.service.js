@@ -1,4 +1,6 @@
 import pool from "../db/index.js";
+import { generateTicketPDF } from "./pdf.service.js";
+import { sendTicketEmail } from "./mail.service.js";
 const TICKET_TYPES = {
   NORMAL: "Normal",
   VIP: "VIP",
@@ -143,7 +145,6 @@ const processTicketPurchaseTransaction = async (
     const orderId = orderResult.rows[0].id;
 
     for (let index = 0; index < quantity; index++) {
-      const ticketRaw = buildOrder(orderId, ticketTypeId);
       const insertQuery = `INSERT INTO tickets (order_id, ticket_type_id)
       VALUES ($1, $2)
       RETURNING id;`;
@@ -155,6 +156,7 @@ const processTicketPurchaseTransaction = async (
       const qrCode = `${
         insertedTicket.rows[0].id
       }-${orderId}-${ticketTypeId}-${Date.now()}`;
+      console.log("🚀 ~ qrCode:", qrCode);
       const updateTicket = await client.query(updateQuery, [
         qrCode,
         insertedTicket.rows[0].id,
@@ -164,12 +166,28 @@ const processTicketPurchaseTransaction = async (
 
     await client.query("COMMIT");
 
+    for (const ticket of result) {
+      const pdf = await generateTicketPDF(
+        orderId,
+        ticket.qr_code,
+        `tmp/ticket-${ticket.id}.pdf`
+      );
+      // Wait 1 second between each ticket PDF generation and email sending
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await sendTicketEmail(
+        "lcykevinlai@gmail.com",
+        orderId,
+        `tmp/ticket-${ticket.id}.pdf`
+      );
+    }
+
     return {
       message: "Tickets purchased successfully",
       orderId,
       ticketResults: result,
     };
   } catch (error) {
+    console.log("🚀 ~ error:", error);
     await client.query("ROLLBACK");
     throw error;
   } finally {
