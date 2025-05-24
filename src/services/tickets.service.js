@@ -131,6 +131,7 @@ const processTicketPurchaseTransaction = async (
   quantity,
   email
 ) => {
+  // TODO: stripe integration for payment processing
   // Start a transaction
   const result = [];
   try {
